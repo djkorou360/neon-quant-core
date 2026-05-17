@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NEON // QUANTITATIVE CORE TERMINAL</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #060608; color: #e2e8f0; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #ffaa00; padding-bottom: 10px; margin-bottom: 20px; }
+        .title { color: #ffaa00; font-size: 24px; font-weight: bold; text-shadow: 0 0 10px rgba(255,170,0,0.3); }
+        .timestamp { color: #888; font-size: 14px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: #0f1015; border-left: 4px solid #00f0ff; padding: 15px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .stat-card.alert { border-left-color: #ffaa00; }
+        .stat-label { font-size: 11px; color: #00f0ff; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 22px; font-weight: bold; margin-top: 5px; }
+        .ticker-tape { background: #12131a; padding: 10px; border: 1px solid #222; border-radius: 4px; margin-bottom: 20px; color: #ffaa00; font-size: 13px; font-weight: bold; }
+        .main-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+        .panel { background: #0f1015; border: 1px solid #1e293b; border-radius: 6px; padding: 20px; box-shadow: 0 10px 15px rgba(0,0,0,0.5); }
+        .panel-title { font-size: 14px; color: #00f0ff; text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 15px; letter-spacing: 1px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+        th { color: #888; padding: 8px; border-bottom: 1px solid #222; text-transform: uppercase; }
+        td { padding: 8px; border-bottom: 1px solid #111; }
+        .text-buy { color: #00ff66; font-weight: bold; }
+        .text-sell { color: #ff3366; font-weight: bold; }
+        .analysis-text { background: #07080c; border: 1px dashed #222; padding: 15px; border-radius: 4px; color: #00ff66; font-size: 13px; line-height: 1.5; min-height: 80px; }
+        .charts-container { display: flex; flex-direction: column; gap: 20px; }
+        .pie-box { display: flex; justify-content: center; align-items: center; max-height: 220px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title">NEON // QUANTITATIVE CORE TERMINAL</div>
+        <div class="timestamp" id="live-clock">CONNECTING...</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Net Portfolio Value</div>
+            <div class="stat-value" id="ui-net-worth" style="color: #ffaa00;">$10,000.00</div>
+            <div style="font-size: 10px; color: #555; margin-top: 2px;">Base Equity: $10,000.00</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Realized & Unrealized PNL</div>
+            <div class="stat-value" id="ui-pnl" style="color: #00ff66;">$0.00</div>
+            <div id="ui-pnl-pct" style="font-size: 10px; color: #555; margin-top: 2px;">0.00% Change</div>
+        </div>
+        <div class="stat-card alert">
+            <div class="stat-label">Cognitive Core Status</div>
+            <div class="stat-value" style="color: #00ff66;">RTX 4060 // LOCAL</div>
+            <div style="font-size: 11px; color: #ffaa00; font-weight: bold; margin-top: 2px;">Ollama Engine: DeepSeek-R1 (8B)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Algorithmic Trades</div>
+            <div class="stat-value" id="ui-trade-count" style="color: #00f0ff;">0</div>
+            <div style="font-size: 10px; color: #555; margin-top: 2px;">Total Loop Executions</div>
+        </div>
+    </div>
+
+    <div class="ticker-tape" id="ui-tape">
+        [ COGNITIVE UPLINK INITIALIZING... STREAMING LOCAL TELEMETRY MAPS ]
+    </div>
+
+    <div class="main-layout">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="panel">
+                <div class="panel-title">Asset Inventory & Market Monitor</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Asset Pair</th>
+                            <th>Market Price</th>
+                            <th>Inventory Held</th>
+                        </tr>
+                    </thead>
+                    <tbody id="market-table-body">
+                        <tr><td colspan="3" style="color: #666;">Awaiting telemetry synchronization metrics...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Execution Ledger</div>
+                <div style="max-height: 250px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Asset</th>
+                                <th>Action</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledger-table-body">
+                            <tr><td colspan="4" style="color: #666; text-align: center;">Awaiting pipeline transaction executions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="panel">
+                <div class="panel-title">Portfolio Equity Value Tracker</div>
+                <canvas id="equityChart" style="max-height: 220px;"></canvas>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Asset Allocation Pie Matrix</div>
+                <div class="pie-box">
+                    <canvas id="allocationPieChart" style="max-width: 200px; max-height: 200px;"></canvas>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Local Neural Matrix Research Output</div>
+                <div style="font-size: 12px; margin-bottom: 8px; font-weight: bold; color: #ffaa00;">SYSTEM MATRIX SYNTHESIS LOGS:</div>
+                <div class="analysis-text" id="ui-analysis">Awaiting core localized pipeline array calculation...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // System Clock Initialization
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toUTCString().replace('GMT', 'UTC');
+        }, 1000);
+
+        // Chart 1: Foolproof Dynamic Line Chart Configuration
+        const ctxLine = document.getElementById('equityChart').getContext('2d');
+        const equityChart = new Chart(ctxLine, {
+            type: 'line',
+            data: { labels: ['Initial'], datasets: [{ label: 'Net Worth (USD)', data: [10000], borderColor: '#ffaa00', backgroundColor: 'rgba(255,170,0,0.05)', borderWidth: 2, tension: 0.1, fill: true }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: '#111' }, ticks: { color: '#666', font: { family: 'Courier New' } } },
+                    y: { 
+                        grid: { color: '#111' }, 
+                        ticks: { color: '#666', font: { family: 'Courier New' } },
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Dynamic Asset Allocation Pie Chart Configuration
+        const ctxPie = document.getElementById('allocationPieChart').getContext('2d');
+        const allocationPieChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['USD'],
+                datasets: [{
+                    data: [10000],
+                    backgroundColor: ['#ffaa00', '#00f0ff', '#00ff66', '#ff3366', '#9933ff', '#ff00ff', '#ffff00', '#00abc8', '#fa8072', '#7fffd4'],
+                    borderWidth: 1,
+                    borderColor: '#060608'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Telemetry Data Ingestion Matrix
+        async function fetchTelemetry() {
+            try {
+                const rTel = await fetch(`telemetry.json?t=${Date.now()}`);
+                if (!rTel.ok) return;
+                const data = await rTel.json();
+
+                // 1. Refresh Dynamic Headings & Statistics Cards
+                const netWorth = data.net_worth || 10000.0;
+                document.getElementById('ui-net-worth').innerText = `$${netWorth.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                
+                const pnl = netWorth - 10000.0;
+                const pnlPct = (pnl / 10000.0) * 100;
+                const pnlEl = document.getElementById('ui-pnl');
+                pnlEl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
+                pnlEl.style.color = pnl >= 0 ? '#00ff66' : '#ff3366';
+                document.getElementById('ui-pnl-pct').innerText = `${pnlPct.toFixed(2)}% Change`;
+
+                document.getElementById('ui-analysis').innerText = data.latest_analysis || "Standing watch.";
+
+                // 2. Hydrate Market Monitor & Inventory Grid
+                const mTable = document.getElementById('market-table-body');
+                mTable.innerHTML = '';
+                const tapePrices = [];
+                const pieLabels = ['USD Cash'];
+                const pieValues = [data.holdings ? data.holdings['USD'] || 0 : netWorth];
+
+                if (data.prices && data.holdings) {
+                    for (const [pair, price] of Object.entries(data.prices)) {
+                        const baseToken = pair.split('/')[0];
+                        const count = data.holdings[baseToken] || 0.0;
+                        tapePrices.push(`${pair}: $${price}`);
+
+                        const row = `<tr>
+                            <td style="color: #00f0ff; font-weight: bold;">${pair}</td>
+                            <td>$${parseFloat(price).toFixed(4)}</td>
+                            <td style="color: #ffaa00; font-weight: bold;">${count} ${baseToken}</td>
+                        </tr>`;
+                        mTable.innerHTML += row;
+
+                        if (count > 0) {
+                            pieLabels.push(baseToken);
+                            pieValues.push(count * parseFloat(price));
+                        }
+                    }
+                    document.getElementById('ui-tape').innerText = `[ ${tapePrices.join(' ]   [ ')} ]`;
+                }
+
+                // 3. Dynamically Redraw Allocation Pie Matrix
+                allocationPieChart.data.labels = pieLabels;
+                allocationPieChart.data.datasets[0].data = pieValues;
+                allocationPieChart.update();
+
+                // 4. Update Dynamic Equity Line Chart History Points
+                if (data.balance_history && data.balance_history.length > 0) {
+                    equityChart.data.labels = data.balance_history.map((_, idx) => `Tick ${idx + 1}`);
+                    equityChart.data.datasets[0].data = data.balance_history;
+                    equityChart.update();
+                }
+
+            } catch (e) { console.log("Data connection polling...", e); }
+        }
+
+        // Ledger Acquisition Stream
+        async function fetchLedger() {
+            try {
+                const rLedger = await fetch(`trade_ledger.json?t=${Date.now()}`);
+                if (!rLedger.ok) return;
+                const text = await rLedger.text();
+                
+                const lTable = document.getElementById('ledger-table-body');
+                const lines = text.trim().split('\n').filter(line => line.length > 0);
+                
+                if (lines.length === 0) {
+                    lTable.innerHTML = `<tr><td colspan="4" style="color: #444; text-align: center;">Awaiting algorithmic signal execution...</td></tr>`;
+                    document.getElementById('ui-trade-count').innerText = "0";
+                    return;
+                }
+
+                document.getElementById('ui-trade-count').innerText = lines.length;
+                lTable.innerHTML = '';
+                
+                lines.reverse().forEach(line => {
+                    const trade = JSON.parse(line);
+                    const actionClass = trade.action.includes('BUY') ? 'text-buy' : 'text-sell';
+                    const row = `<tr>
+                        <td style="color: #666;">${trade.time}</td>
+                        <td style="font-weight: bold;">${trade.pair}</td>
+                        <td class="${actionClass}">${trade.action}</td>
+                        <td style="color: #ffaa00;">$${parseFloat(trade.price).toFixed(4)}</td>
+                    </tr>`;
+                    lTable.innerHTML += row;
+                });
+            } catch (e) { }
+        }
+
+        setInterval(fetchTelemetry, 3000);
+        setInterval(fetchLedger, 3000);
+        fetchTelemetry();
+        fetchLedger();
+    </script>
+</body>
+</html>
