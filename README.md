@@ -1,4 +1,4 @@
-Project Name: NEON // Quantitative Core Terminal
+# Project Name: NEON // Quantitative Core Terminal
 
 Description:
 Most retail algorithmic agents operate with a fatal cognitive flaw: operational amnesia. They process 60-second market intervals in a vacuum, reacting to micro-volatility by "churning"—panic-selling bottoms and bleeding capital to exchange fees. Neon solves this. It is a localized, autonomous trading framework built with the discipline of an institutional risk desk.
